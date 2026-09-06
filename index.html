@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechZone - المتجر الإلكتروني الأحدث</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .logo { font-size: 1.4rem; font-weight: 800; color: #2563eb; text-decoration: none; }
+        .search-bar { display: flex; gap: 8px; width: 35%; max-width: 400px; }
+        .search-bar input { width: 100%; padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 0.9rem; }
+        .search-bar input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .search-bar button { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .nav-links { display: flex; align-items: center; gap: 15px; }
+        .nav-links a { text-decoration: none; color: #64748b; font-size: 0.95rem; font-weight: 500; }
+        .btn-login-nav { background: #f1f5f9; color: #2563eb !important; padding: 6px 14px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 600 !important; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; flex: 1; width: 100%; }
+        .hero { background: linear-gradient(135deg, #2563eb, #1e40af); color: white; padding: 40px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+        .hero h1 { font-size: 2rem; margin-bottom: 10px; }
+        .section-title { font-size: 1.3rem; margin-bottom: 20px; color: #0f172a; }
+        .btn-add { width: 100%; background: #2563eb; padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 600; color: white; border: none; }
+        .contact-section, .login-section { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; color: #475569; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; outline: none; }
+        .status-message { display: none; padding: 12px 16px; border-radius: 6px; margin-top: 15px; font-size: 0.9rem; }
+        .status-message.success { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .status-message.error { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .results-area { margin-bottom: 30px; display: none; }
+        .comment-box { border-bottom: 1px solid #e2e8f0; padding: 10px 0; }
+        .comment-box:last-child { border-bottom: none; }
+        footer { background: white; border-top: 1px solid #e2e8f0; padding: 20px; text-align: center; color: #64748b; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" class="logo">TechZone</a>
+        <form class="search-bar" action="/api/products/search" method="GET" onsubmit="handleSearch(event, this)">
+            <input type="text" name="q" placeholder="ابحث عن أجهزة، إكسسوارات..." required>
+            <button type="submit">بحث</button>
+        </form>
+        <nav class="nav-links">
+            <a href="#">الرئيسية</a>
+            <a href="#login" class="btn-login-nav">تسجيل الدخول</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>عروض الصيف على الأجهزة الذكية</h1>
+        </div>
+        
+        <div id="resultsArea" class="results-area"><div id="resultsContainer"></div></div>
+
+        <!-- الأقسام المتعددة -->
+        <div class="login-section" id="login">
+            <h2 class="section-title">تسجيل الدخول</h2>
+            <form action="/api/auth/login" method="POST" onsubmit="handleFormSubmit(event, this, 'loginStatus')">
+                <div class="form-group"><label>اسم المستخدم:</label><input type="text" name="username" placeholder="user@example.com" required></div>
+                <div class="form-group"><label>كلمة المرور:</label><input type="password" name="password" placeholder="********" required></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">دخول للحساب</button>
+                <div id="loginStatus" class="status-message"></div>
+            </form>
+        </div>
+        
+        <div class="contact-section">
+            <h2 class="section-title">التحقق من توفر المخزون</h2>
+            <form action="/api/stock/check" method="POST" onsubmit="handleFormSubmit(event, this, 'ssrfStatus')">
+                <div class="form-group"><label>رابط مزود الخدمة:</label><input type="text" name="stockApi" placeholder="http://api.stock.local/item" required></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">فحص المخزون</button>
+                <div id="ssrfStatus" class="status-message" style="white-space: pre-wrap;"></div>
+            </form>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="section-title">تتبع الطلبات</h2>
+            <form action="/track" method="GET">
+                <div class="form-group"><label>رقم الطلب:</label><input type="text" name="order_id" placeholder="مثال: ORD-12345" required></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">تتبع الشحنة</button>
+            </form>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="section-title">إعدادات الحساب - تغيير البريد</h2>
+            <form action="/my-account/change-email" method="POST" onsubmit="handleFormSubmit(event, this, 'csrfStatus')">
+                <div class="form-group"><label>البريد الإلكتروني الجديد:</label><input type="email" name="email" placeholder="new@example.com" required></div>
+                <input type="hidden" name="csrf" value="{{ csrf_token }}">
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">حفظ التغييرات</button>
+                <div id="csrfStatus" class="status-message"></div>
+            </form>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="section-title">تواصل مع الدعم الفني</h2>
+            <form action="/api/support/ticket" method="POST" onsubmit="handleFormSubmit(event, this, 'supportStatus')">
+                <div class="form-group"><label>البريد الإلكتروني:</label><input type="text" name="email" placeholder="name@domain.com" required></div>
+                <div class="form-group"><label>تفاصيل المشكلة:</label><textarea name="message" rows="4" placeholder="اكتب استفسارك هنا..." required></textarea></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">إرسال الاستفسار</button>
+                <div id="supportStatus" class="status-message"></div>
+            </form>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="section-title">شراء المنتجات</h2>
+            <form action="/api/purchase" method="POST" onsubmit="handleFormSubmit(event, this, 'logicStatus')">
+                <div class="form-group"><label>الكمية المطلوبة:</label><input type="number" name="quantity" value="1" required></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">تأكيد الشراء</button>
+                <div id="logicStatus" class="status-message"></div>
+            </form>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="section-title">استعراض الفواتير</h2>
+            <form action="/api/documents/view" method="GET" onsubmit="handleIDOR(event, this)">
+                <div class="form-group"><label>رقم الفاتورة:</label><input type="number" name="id" placeholder="1002" required></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">تنزيل الفاتورة</button>
+                <div id="idorStatus" class="status-message"></div>
+            </form>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="section-title">رفع المرفقات</h2>
+            <form action="/api/upload" method="POST" enctype="multipart/form-data" onsubmit="handleUpload(event, this)">
+                <div class="form-group"><label>الرجاء اختيار ملف الدعم:</label><input type="file" name="file" required></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">رفع الملف</button>
+                <div id="uploadStatus" class="status-message"></div>
+            </form>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="section-title">تقييمات المتجر</h2>
+            <div id="commentsSection" style="margin-bottom:15px; padding:15px; background:#f1f5f9; border-radius:6px; min-height: 50px;">
+                جاري تحميل التقييمات...
+            </div>
+            <form action="/api/comments" method="POST" onsubmit="handleCommentSubmit(event, this)">
+                <div class="form-group"><label>الاسم:</label><input type="text" name="author" placeholder="اسمك..." required></div>
+                <div class="form-group"><label>رأيك في المتجر:</label><textarea name="body" rows="3" placeholder="اكتب تقييمك..." required></textarea></div>
+                <button type="submit" class="btn-add" style="width:auto; padding:10px 24px;">نشر التقييم</button>
+                <div id="commentStatus" class="status-message"></div>
+            </form>
+        </div>
+
+    </div>
+
+    <footer><p>© 2026 TechZone Store Inc.</p></footer>
+
+    <script>
+        async function handleFormSubmit(e, form, statusId) {
+            e.preventDefault();
+            const statusDiv = document.getElementById(statusId);
+            statusDiv.className = 'status-message';
+            statusDiv.innerText = 'جاري المعالجة...';
+            statusDiv.style.display = 'block';
+
+            try {
+                const res = await fetch(form.action, { method: form.method, body: new FormData(form) });
+                const data = await res.json();
+                statusDiv.className = res.ok ? 'status-message success' : 'status-message error';
+                statusDiv.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                statusDiv.className = 'status-message error';
+                statusDiv.innerText = 'حدث خطأ في الاتصال.';
+            }
+        }
+
+        async function handleUpload(e, form) {
+            e.preventDefault();
+            const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+            const data = await res.json();
+            const statusDiv = document.getElementById('uploadStatus');
+            statusDiv.className = res.ok ? 'status-message success' : 'status-message error';
+            statusDiv.innerText = JSON.stringify(data, null, 2);
+            statusDiv.style.display = 'block';
+        }
+
+        async function handleSearch(e, form) {
+            e.preventDefault();
+            const query = form.q.value;
+            const resultsArea = document.getElementById('resultsArea');
+            resultsArea.style.display = 'block';
+            resultsArea.innerHTML = `<h2 class="section-title">نتائج البحث عن: <span style="color:#2563eb;">${query}</span></h2>`;
+            await fetch(`${form.action}?q=${encodeURIComponent(query)}`);
+        }
+
+        async function handleIDOR(e, form) {
+            e.preventDefault();
+            const res = await fetch(`${form.action}?id=${form.id.value}`);
+            const data = await res.json();
+            const statusDiv = document.getElementById('idorStatus');
+            statusDiv.className = 'status-message success';
+            statusDiv.innerText = JSON.stringify(data, null, 2);
+            statusDiv.style.display = 'block';
+        }
+
+        async function loadComments() {
+            const res = await fetch('/api/comments');
+            const data = await res.json();
+            const section = document.getElementById('commentsSection');
+            section.innerHTML = '';
+            if (data.comments && data.comments.length > 0) {
+                data.comments.forEach(c => {
+                    section.innerHTML += `<div class="comment-box"><strong>${c.author}:</strong> <p>${c.body}</p></div>`;
+                });
+            } else {
+                section.innerHTML = 'لا توجد تقييمات حتى الآن.';
+            }
+        }
+
+        async function handleCommentSubmit(e, form) {
+            e.preventDefault();
+            const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+            if (res.ok) {
+                form.reset();
+                loadComments();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadComments);
+    </script>
+</body>
+</html>
